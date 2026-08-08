@@ -14,12 +14,22 @@ of asserted.
 
 ## The thesis
 
-Published RCA scores for LLM agents are poor, and consistently so:
+Published RCA scores for LLM agents are poor — but improving fast with model
+generation, and quoting a stale number would misrepresent both facts. Dated and
+attributed:
 
-| Benchmark | Best reported result | Scale |
-|---|---|---|
-| [ORCA-bench](https://arxiv.org/abs/2607.28545) | **48.8%** RCA depth (GPT-5.5) | 884 incident tasks |
-| [OpenRCA](https://github.com/microsoft/OpenRCA) (ICLR'25) | **11.34%** accuracy (Claude 3.5 + RCA-agent) | 335 failures, 68 GB telemetry |
+| Benchmark | Model | Result | When |
+|---|---|---|---|
+| [OpenRCA](https://github.com/microsoft/OpenRCA) (335 failures) | Claude 3.5 + RCA-agent | 11.34% | ICLR'25 |
+| OpenRCA | Claude Opus 4.5 | 90/335 = **27%** | [Opus 4.6 system card](https://www.anthropic.com/news/claude-opus-4-6) |
+| OpenRCA | Claude Opus 4.6 | 117/335 = **35%** | Feb 2026 |
+| [ORCA-bench](https://arxiv.org/abs/2607.28545) (884 tasks) | Claude Sonnet 4.6 | 30.6% strict accuracy | Jul 2026 |
+| ORCA-bench | GPT-5.5 | **48.8%** RCA depth | Jul 2026 |
+
+**Read the trend, not the floor.** OpenRCA went 11% → 27% → 35% across three
+Claude generations on an unchanged task set. Still, the best current numbers
+leave **roughly two thirds of incidents misdiagnosed**, which is nowhere near
+dependable for an on-call rotation.
 
 **The structural reason is the graph.** Cloud dependency graphs are huge,
 dynamic and undocumented, so an agent must infer the topology and diagnose the
@@ -31,8 +41,29 @@ shared filesystem → accounting DB → slurmdbd → slurmctld → scheduling
 
 is small, static, documented, and identical at every Slurm site.
 
-> **Hypothesis:** most of the accuracy general agents lose is lost to graph
-> inference, not reasoning. Write the graph down and much of it returns.
+> **Hypothesis:** a meaningful share of what general agents lose is lost to
+> graph inference, not reasoning. Write the graph down and some of it returns.
+
+**The generational trend is why this needs an ablation rather than an opinion.**
+Scores are climbing on raw capability alone, so the only interesting question is
+whether an explicit graph helps *beyond* scaling — which is measurable exactly
+once configurations differ by one variable at a time.
+
+## Model
+
+All configurations run **`claude-opus-5`**, the current strongest model, so the
+ablation isolates architecture rather than model choice. Every config uses the
+same model and the same telemetry; only the layer under test changes.
+
+Two consequences worth stating up front:
+
+- **Config A is not directly comparable to the published numbers above.** Those
+  used different models, harnesses and task sets. A is a baseline *within this
+  ablation*, not a reproduction of anyone else's result, and treating it as one
+  would be the easiest way to manufacture a flattering headline.
+- **The model will move again.** Any absolute score here has a shelf life
+  measured in months; the *differences between configurations* on a fixed model
+  are the durable finding.
 
 ## The ablation is the finding
 
