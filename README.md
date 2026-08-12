@@ -65,6 +65,64 @@ Two consequences worth stating up front:
   measured in months; the *differences between configurations* on a fixed model
   are the durable finding.
 
+## What exists today
+
+Phases 1–2 are built and tested. The LLM configurations (A–E) need an API key
+and are next.
+
+| Layer | Status |
+|---|---|
+| **Dependency graph** (`csa/graph.py`) | **built** — 13 edges, 62% measured on a live cluster |
+| **Read-only tool surface** (`csa/mcp/readonly.py`) | **built** — enforced in code, 30+ adversarial tests |
+| Supervisor + specialists | next (needs `ANTHROPIC_API_KEY`) |
+| Calibrated abstention | after |
+| Blast-radius guardrails + verifier | after |
+
+```bash
+csa causes slurm.scheduler        # rank what could explain a symptom
+csa tools                         # the read-only surface
+csa check scontrol update NodeName=ALL State=DRAIN   # exits 1
+```
+
+### The graph refuses the folk model
+
+```
+$ csa causes slurm.scheduler
+
+  symptom: slurm.scheduler (halts)
+
+  measured   slurm.config             1 hop(s)  slurm.config → slurm.scheduler
+  documented slurm.slurmctld          1 hop(s)  slurm.slurmctld → slurm.scheduler
+
+  ruled out by measurement:
+    slurm.slurmdbd    none — scheduling continues normally with accounting unavailable
+```
+
+Being able to say *"I checked the accounting path and it cannot produce this
+symptom"* is worth as much as naming the cause. That line is the entire
+difference between this and the architecture diagram everyone already has.
+
+**Severity composes along a path, and does not compose transitively.** The
+first version of the traversal got this wrong and a test caught it. The chain
+
+```
+db.mysql --HALTS--> slurmdbd --DEGRADES--> slurmctld --HALTS--> scheduler
+```
+
+has all its arrows present, so a naive breadth-first walk concludes the
+database can stop scheduling — reintroducing the exact folk model this project
+measured and refuted. A path is only as strong as its weakest link, so the
+effect is the `min` over the edges: the middle link merely degrades the
+controller, and a degraded controller keeps scheduling.
+
+### Read-only is a control, not a request
+
+A prompt saying "only use read-only commands" fails open. The allowlist lives
+in `guard()`, which every execution path calls, and the tests drive it with the
+commands an agent would actually reach for at 3am — `scontrol update
+NodeName=ALL State=DRAIN`, `scancel`, `sinfo; rm -rf /`, `/usr/bin/scancel`.
+CI fails the build if any of them is permitted.
+
 ## The ablation is the finding
 
 Five configurations, each runnable independently via config. The comparison
