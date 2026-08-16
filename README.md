@@ -4,11 +4,17 @@ An LLM agent that diagnoses Slurm control-plane incidents, built as **five
 ablatable configurations** so that what actually helps can be measured instead
 of asserted.
 
-> **Status: Phase 1 — design published, agent not built yet.** Nothing here has
-> been measured. The results table below is empty and stays empty until it is
-> not. Published now because the benchmark it will be scored against
-> ([slurm-rca-bench](https://github.com/Zhanyl-tech/slurm-rca-bench)) is
-> public, and the configurations were specified *before* any results existed.
+> **Status: the dependency graph and the read-only tool surface are built and
+> tested; the LLM configurations are not.** `csa causes` and `csa check` work
+> today. What is *not* built is the agent loop itself — configs A–E need an API
+> key — so **no diagnosis accuracy has been measured** and the results table
+> below stays empty until it is.
+>
+> The configurations were specified *before* any results existed, and the
+> benchmark they will be scored against
+> ([slurm-rca-bench](https://github.com/Zhanyl-tech/slurm-rca-bench)) was
+> published first. That ordering is the point: it is what stops the ablation
+> from being fitted to its own conclusion.
 
 ---
 
@@ -218,9 +224,12 @@ Six layers, in build order:
 
 ## Limitations
 
-- **Nothing is measured yet.** Every claim above is a design intention.
-- **Five scenarios** in the benchmark today, which is not enough to rank
-  configurations. Phase 2 takes it to 15–20.
+- **No diagnosis accuracy is measured yet.** The graph and the tool surface
+  are tested; the agent's ability to *use* them is not.
+- **Ten scenarios** in the benchmark today, which is still not enough to rank
+  configurations confidently. 15–20 is the target.
+- **The graph is 62% measured.** The rest is documented or inferred, and every
+  edge says which — but an inferred edge is still a hypothesis, not a fact.
 - **The faults are emulated.** See the benchmark's limitations section.
 - **One model family initially.** Config A is meant to be comparable to
   published baselines, but "comparable" across different harnesses and task
@@ -230,12 +239,17 @@ Six layers, in build order:
 
 | Phase | Scope | Status |
 |---|---|---|
-| 1 | Benchmark harness + 5 scenarios ([slurm-rca-bench](https://github.com/Zhanyl-tech/slurm-rca-bench)) | **done** |
-| 2 | Scenarios to 15–20, scoring library | next |
-| 3 | Configs A and B | |
-| 4 | Dependency graph, config C, **first real comparison** | |
-| 5 | Configs D and E | |
-| 6 | Guardrails and action | |
+| 1 | Benchmark harness + scenarios ([slurm-rca-bench](https://github.com/Zhanyl-tech/slurm-rca-bench)) | **done** — 10 scenarios |
+| 2 | Scoring library + degenerate baselines | **done** |
+| 3 | **Dependency graph** + read-only tool surface | **done** — 13 edges, 62% measured |
+| 4 | Configs A and B (raw LLM, then + tools) | next — needs `ANTHROPIC_API_KEY` |
+| 5 | Config C (+ graph), **first real comparison** | |
+| 6 | Configs D and E, guardrails and action | |
+
+The graph moved earlier than originally planned, because it is the one layer
+that could be built and tested without an API key — and because building it
+surfaced a modelling error (severity does not compose transitively) that would
+otherwise have been discovered only after it had polluted a set of results.
 
 ## License
 
