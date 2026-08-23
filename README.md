@@ -84,11 +84,29 @@ and are next.
 | Calibrated abstention | after |
 | Blast-radius guardrails + verifier | after |
 
+## Quickstart
+
+No cluster and no API key. The graph and the read-only tool surface are the
+parts that are built, and both run offline.
+
 ```bash
+make install                      # venv + editable install, provides `csa`
+make graph                        # rank what could explain a scheduling symptom
+make tools                        # the read-only surface
+make check                        # ruff, mypy --strict, pytest
+```
+
+Or without make:
+
+```bash
+pip install -e ".[dev]"
 csa causes slurm.scheduler        # rank what could explain a symptom
 csa tools                         # the read-only surface
 csa check scontrol update NodeName=ALL State=DRAIN   # exits 1
 ```
+
+The LLM configurations additionally need `pip install -e ".[llm]"` and an
+`ANTHROPIC_API_KEY`. They are not built yet — see the roadmap.
 
 ### The graph refuses the folk model
 
