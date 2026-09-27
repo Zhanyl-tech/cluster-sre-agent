@@ -1,0 +1,19 @@
+{
+  "commit": "469ea760de677295a833f709b7713f06e36abff2",
+  "files": {
+    "scenarios/S01-storage-stall-scheduling-halt/scenario.yaml": "62d7a8941645407bec04191628f37c14e40ec188579f7b57cd6029a0375b0a35",
+    "scenarios/S02-dbd-lock-contention/scenario.yaml": "61ea2bc1f35c7e761028517a1ad8d7d02e97626eafff7c375c333bec3bcb4715",
+    "scenarios/S03-controller-rpc-saturation/scenario.yaml": "0a67b06e413c02c38aaf866b3cc5567a0329162e761555ff2050f4e530e5b6c5",
+    "scenarios/S04-gpu-ecc-drain/scenario.yaml": "2b4557f5bf40afd63abd28beac6c96ea593dbbdcd12d0ad5e6668686c4dc818a",
+    "scenarios/S05-undiagnosable-node-reboot/scenario.yaml": "85c421a40b62193f060e1fab0aec418da319c21597aefc375766f1b173847a6d",
+    "scenarios/S06-state-save-unwritable/scenario.yaml": "35d9c524fd8d10abfa6c2ebfab8076d7e961ed2250c42bad52b56c9ceb4f439f",
+    "scenarios/S07-fabric-degraded-collectives/scenario.yaml": "3f608c6040d86559e95323ad802918967faeda9ba2d444b3f56cd6631a8de982",
+    "scenarios/S08-partition-limit-starvation/scenario.yaml": "e6a2939c82d6c9bbdf9a039ac4a3177287f4d8d242bb92ac1087d5069d0b03b7",
+    "scenarios/S09-gpu-driver-node-drain/scenario.yaml": "e83974d42a54b07d78f9979fdbbd7b930a0fa7d822cabe49d78e8e448f9e5ee5",
+    "scenarios/S10-undiagnosable-intermittent-failures/scenario.yaml": "1e542fcb60ee35926385d2f23e60c86f16aa87926953637b5493318c8c38a3c7",
+    "src/slurmrca/spec.py": "be8e965473d91ceea77c37d44af0f92084b92bf893f352e9600049274190230d"
+  },
+  "license": "MIT (same author); see the upstream LICENSE",
+  "note": "Verbatim copies made by scripts/sync_bench_snapshot.py with `git show <commit>:<path>`. Do not edit by hand; the tests check these hashes.",
+  "upstream": "https://github.com/Zhanyl-tech/slurm-rca-bench"
+}

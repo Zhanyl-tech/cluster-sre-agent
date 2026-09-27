@@ -3,32 +3,38 @@ on:
   push:
     branches: [main]
   pull_request:
+
+# Least privilege: the job only reads the repository.
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.11", "3.12", "3.13"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      # Actions are pinned by commit SHA (tag in the comment), so a moved tag
+      # cannot change what runs.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           python-version: ${{ matrix.python-version }}
-          cache: pip
-      - run: pip install --upgrade pip && pip install -e ".[dev]"
-      - run: ruff check .
-      - run: ruff format --check .
-      - run: mypy
-      - run: pytest -q
+          enable-cache: true
+      # --locked fails if uv.lock is stale, so a new ruff or mypy release
+      # cannot turn main red without a commit that bumps the lock.
+      - run: uv sync --locked --extra dev
+      - run: uv run --frozen ruff check .
+      - run: uv run --frozen ruff format --check .
+      - run: uv run --frozen mypy
+      # Branch coverage with the gate from [tool.coverage.report] fail_under.
+      - run: uv run --frozen pytest -q --cov=csa --cov-branch
       # The read-only surface is a safety control, so prove it holds from the
-      # CLI as well as from unit tests — a mutating command must exit non-zero.
+      # CLI as well as from unit tests: any listed write that is permitted, or
+      # listed read that is refused, fails the build.
       - name: Read-only surface refuses mutations
-        run: |
-          python -m csa.cli check sinfo -N
-          if python -m csa.cli check scontrol update NodeName=ALL State=DRAIN; then
-            echo "::error::guard allowed a state-changing command"; exit 1
-          fi
-          if python -m csa.cli check scancel 1; then
-            echo "::error::guard allowed scancel"; exit 1
-          fi
+        run: uv run --frozen sh scripts/smoke-guard.sh
